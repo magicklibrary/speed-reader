@@ -38,7 +38,7 @@ Advanced speed reading web application with binaural beats, OCR support, and com
 - **Recent Documents:** Quick access to last 10 documents
 - **Progress Indicators:** See completion percentage and time remaining
 
-## 📱 Installation
+## Installation
 
 ### On iPhone/iPad:
 1. Open https://magicklibrary.github.io/speed-reader/ in Safari
