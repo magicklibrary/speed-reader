@@ -968,4 +968,186 @@
     exitBtn.addEventListener('click', () => {
       stopReading();
       isPlaying = false;
-      current
+      currentIndex = 0;
+      words = [];
+      pageBuffer = {};
+      isBuffering = false;
+      currentPdf = null;
+      autoStarted = false;
+      playPauseBtn.textContent = '⏸️';
+      readerScreen.classList.remove('active');
+      uploadScreen.classList.remove('hidden');
+      fileInput.value = '';
+      ocrStatus.classList.add('hidden');
+      controlsMenu.classList.remove('active');
+      clearFadeTimer();
+      showButtons();
+    });
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (readerScreen.classList.contains('active')) {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          togglePlayPause();
+          showButtons();
+          if (isPlaying) {
+            startFadeTimer();
+          } else {
+            clearFadeTimer();
+          }
+        } else if (e.code === 'Escape') {
+          e.preventDefault();
+          if (controlsMenu.classList.contains('active')) {
+            controlsMenu.classList.remove('active');
+          } else {
+            exitBtn.click();
+          }
+        } else if (e.code === 'ArrowLeft') {
+          e.preventDefault();
+          if (currentIndex > 0) {
+            currentIndex--;
+            updateDisplay();
+          }
+        } else if (e.code === 'ArrowRight') {
+          e.preventDefault();
+          if (currentIndex < words.length - 1) {
+            currentIndex++;
+            updateDisplay();
+          }
+        }
+      }
+    });
+
+    // Handle orientation changes
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        if (words.length > 0) {
+          updateDisplay();
+        }
+      }, 100);
+    });
+
+    // Handle resize for dynamic font adjustment
+    window.addEventListener('resize', () => {
+      if (words.length > 0) {
+        adjustFontSize(words[currentIndex]);
+      }
+    });
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (readerScreen.classList.contains('active')) {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          togglePlayPause();
+          showButtons();
+          if (isPlaying) {
+            startFadeTimer();
+          } else {
+            clearFadeTimer();
+          }
+        } else if (e.code === 'Escape') {
+          e.preventDefault();
+          if (controlsMenu.classList.contains('active')) {
+            controlsMenu.classList.remove('active');
+          } else {
+            exitBtn.click();
+          }
+        } else if (e.code === 'ArrowLeft') {
+          e.preventDefault();
+          if (currentIndex > 0) {
+            currentIndex--;
+            updateDisplay();
+          }
+        } else if (e.code === 'ArrowRight') {
+          e.preventDefault();
+          if (currentIndex < words.length - 1) {
+            currentIndex++;
+            updateDisplay();
+          }
+        }
+      }
+    });
+
+    // Exit Button
+    exitBtn.addEventListener('click', () => {
+      stopReading();
+      isPlaying = false;
+      currentIndex = 0;
+      words = [];
+      pageBuffer = {};
+      isBuffering = false;
+      currentPdf = null;
+      autoStarted = false;
+      playPauseBtn.textContent = '⏸️';
+      readerScreen.classList.remove('active');
+      uploadScreen.classList.remove('hidden');
+      fileInput.value = '';
+      ocrStatus.classList.add('hidden');
+      controlsMenu.classList.remove('active');
+      showButtons();
+      clearFadeTimer();
+    });
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (readerScreen.classList.contains('active')) {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          togglePlayPause();
+          showButtons();
+          if (isPlaying) {
+            startFadeTimer();
+          } else {
+            clearFadeTimer();
+          }
+        } else if (e.code === 'Escape') {
+          e.preventDefault();
+          if (controlsMenu.classList.contains('active')) {
+            controlsMenu.classList.remove('active');
+          } else {
+            exitBtn.click();
+          }
+        } else if (e.code === 'ArrowLeft') {
+          e.preventDefault();
+          if (currentIndex > 0) {
+            currentIndex--;
+            updateDisplay();
+          }
+        } else if (e.code === 'ArrowRight') {
+          e.preventDefault();
+          if (currentIndex < words.length - 1) {
+            currentIndex++;
+            updateDisplay();
+          }
+        }
+      }
+    });
+
+    // Mouse movement shows buttons
+    document.addEventListener('mousemove', () => {
+      if (readerScreen.classList.contains('active')) {
+        showButtons();
+        if (isPlaying && !controlsMenu.classList.contains('active')) {
+          startFadeTimer();
+        }
+      }
+    });
+
+    // Handle orientation changes
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        updateDisplay();
+      }, 100);
+    });
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      if (words.length > 0) {
+        updateDisplay();
+      }
+    });
+  </script>
+</body>
+</html>
