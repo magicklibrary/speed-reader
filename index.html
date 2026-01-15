@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Speed Reader">
+  <meta name="theme-color" content="#1e293b">
+  <title>PDF Speed Reader Pro</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 0.5rem; overflow-x: hidden; }
+    .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); padding: 1.5rem; min-height: calc(100vh - 1rem); }
+    header { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e2e8f0; }
+    h1 { font-size: 2rem; color: #1e293b; margin-bottom: 0.3rem; }
+    .subtitle { color: #64748b; font-size: 0.95rem; }
+    .install-banner { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; text-align: center; }
+    .install-banner h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .install-banner p { margin-bottom: 1rem; opacity: 0.95; }
+    .install-steps { background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; text-align: left; margin-bottom: 1rem; }
+    .install-steps div { padding: 0.5rem 0; font-size: 0.9rem; }
+    .tabs { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; background: #f1f5f9; padding: 0.25rem; border-radius: 12px; }
+    .tab { flex: 1; padding: 0.75rem; background: transparent; border: none; font-size: 0.9rem; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 10px; transition: all 0.3s; }
+    .tab.active { background: white; color: #3b82f6; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .upload-area { border: 3px dashed #cbd5e1; border-radius: 20px; padding: 3rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s; background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); margin-bottom: 1.5rem; }
+    .upload-area:active { transform: scale(0.98); }
+    .upload-area.dragover { border-color: #3b82f6; background: #eff6ff; transform: scale(1.02); }
+    .upload-icon { font-size: 4rem; margin-bottom: 1rem; animation: bounce 2s infinite; }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .upload-area h2 { color: #1e293b; margin-bottom: 0.5rem; font-size: 1.3rem; }
+    .upload-area p { color: #64748b; font-size: 0.9rem; }
+    .reader-display { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-radius: 20px; padding: 3rem 1.5rem; min-height: 250px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); }
+    .word-display { font-size: 3rem; font-family: 'Courier New', monospace; font-weight: bold; letter-spacing: 2px; text-align: center; }
+    .word-before { color: #64748b; }
+    .word-orp { color: #ef4444; font-size: 3.5rem; }
+    .word-after { color: #cbd5e1; }
+    .progress-bar { background: #e2e8f0; height: 10px; border-radius: 10px; overflow: hidden; margin-bottom: 0.75rem; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%); transition: width 0.2s; }
+    .progress-text { display: flex; justify-content: space-between; color: #64748b; font-size: 0.85rem; margin-bottom: 1.5rem; font-weight: 600; }
+    .controls { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .btn { flex: 1; padding: 1rem; border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .btn:active { transform: scale(0.95); }
+    .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; }
+    .btn-secondary { background: linear-gradient(135deg, #64748b 0%, #475569 100%); color: white; }
+    .btn-training { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; }
+    .wpm-control { background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; }
+    .wpm-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; font-weight: 700; color: #1e293b; font-size: 1.1rem; }
+    .wpm-value { font-size: 1.8rem; color: #3b82f6; }
+    .wpm-slider { width: 100%; height: 12px; border-radius: 10px; background: #cbd5e1; outline: none; -webkit-appearance: none; margin-bottom: 0.75rem; }
+    .wpm-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); cursor: pointer; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5); }
+    .wpm-labels { display: flex; justify-content: space-between; color: #64748b; font-size: 0.8rem; font-weight: 600; }
+    .level-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .badge { padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: #e2e8f0; color: #64748b; }
+    .badge.active { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
+    .training-mode { background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; }
+    .training-mode h3 { color: #92400e; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .training-progress { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .training-step { flex: 1; height: 8px; background: #e7e5e4; border-radius: 10px; overflow: hidden; }
+    .training-step.complete { background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); }
+    .training-info { color: #78350f; font-size: 0.9rem; line-height: 1.6; }
+    .search-box { position: relative; margin-bottom: 1.5rem; }
+    .search-input { width: 100%; padding: 1rem 4rem 1rem 1rem; border: 2px solid #e2e8f0; border-radius: 14px; font-size: 1rem; transition: all 0.3s; }
+    .search-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+    .search-btn { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.9rem; }
+    .search-results { max-height: 400px; overflow-y: auto; border: 2px solid #e2e8f0; border-radius: 14px; padding: 1rem; background: white; }
+    .search-result-item { padding: 1rem; border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s; border-radius: 8px; margin-bottom: 0.5rem; }
+    .search-result-item:active { background: #f8fafc; }
+    .highlight { background: linear-gradient(135deg, #fef08a 0%, #fde047 100%); padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+    .result-page { display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 0.3rem 0.7rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; margin-right: 0.5rem; }
+    .file-info { background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); padding: 1rem; border-radius: 14px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+    .file-name { font-weight: 700; color: #1e293b; font-size: 0.9rem; flex: 1; min-width: 150px; }
+    .hidden { display: none; }
+    @media (max-width: 768px) { .word-display { font-size: 2.5rem; } .word-orp { font-size: 3rem; } .controls { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📖 Speed Reader Pro</h1>
+      <p class="subtitle">Read 3x faster • Train your speed • Search PDFs</p>
+    </header>
+    <div class="install-banner" id="installBanner">
+      <h2>📱 Install This App!</h2>
+      <p>Get offline access and a native app experience</p>
+      <div class="install-steps">
+        <div>1️⃣ Tap the Share button <strong>⬆️</strong> at the bottom</div>
+        <div>2️⃣ Scroll and tap <strong>"Add to Home Screen"</strong></div>
+        <div>3️⃣ Tap <strong>"Add"</strong> in the top right</div>
+        <div>✅ Open from your home screen like any app!</div>
+      </div>
+      <button onclick="hideInstallBanner()" style="background: white; color: #10b981; border: none; padding: 0.75rem 2rem; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem;">Got it!</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('reader')">📖 Reader</button>
+      <button class="tab" onclick="switchTab('training')">🎯 Training</button>
+      <button class="tab" onclick="switchTab('search')">🔍 Search</button>
+    </div>
+    <div class="tab-content active" id="readerTab">
+      <div id="uploadSection">
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">📄</div>
+          <h2>Tap to Upload PDF</h2>
+          <p>Or drag and drop your file here</p>
+        </div>
+        <input type="file" id="fileInput" accept="application/pdf" style="display: none;">
+      </div>
+      <div id="readerSection" class="hidden">
+        <div class="file-info">
+          <span class="file-name" id="fileName"></span>
+          <button class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 10px; border: none; cursor: pointer; color: white; font-size: 0.85rem; font-weight: 700;" onclick="loadNewFile()">New PDF</button>
+        </div>
+        <div class="reader-display">
+          <div class="word-display">
+            <span class="word-before" id="wordBefore"></span><span class="word-orp" id="wordOrp"></span><span class="word-after" id="wordAfter"></span>
+          </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-text">
+          <span id="progressText">Word 0 of 0</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="controls">
+          <button class="btn btn-primary" onclick="togglePlay()">
+            <span id="playIcon">▶️</span> <span id="playText">Play</span>
+          </button>
+          <button class="btn btn-secondary" onclick="reset()">🔄 Reset</button>
+        </div>
+        <div class="wpm-control">
+          <div class="wpm-header">
+            <span>⚡ Speed</span>
+            <span class="wpm-value" id="wpmDisplay">300</span>
+          </div>
+          <input type="range" class="wpm-slider" id="wpmSlider" min="150" max="950" step="50" value="300">
+          <div class="wpm-labels">
+            <span>Beginner<br>150</span>
+            <span>Average<br>300</span>
+            <span>Advanced<br>600</span>
+            <span>Expert<br>950</span>
+          </div>
+          <div class="level-badges">
+            <span class="badge" id="badge150">🐢 Beginner (150-250)</span>
+            <span class="badge" id="badge300">🚶 Average (300-400)</span>
+            <span class="badge" id="badge500">🏃 Advanced (500-700)</span>
+            <span class="badge" id="badge800">⚡ Expert (800-950)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tab-content" id="trainingTab">
+      <div class="training-mode">
+        <h3>🎯 Speed Reading Training</h3>
+        <div class="training-progress" id="trainingProgress"></div>
+        <div class="training-info">
+          <strong>Training Mode:</strong> Gradually increase your reading speed with guided exercises.<br><br>
+          <strong>How it works:</strong><br>
+          • Start at comfortable 200 WPM for 30 seconds<br>
+          • Speed increases by 50 WPM every 30 seconds<br>
+          • Build muscle memory and improve comprehension<br>
+          • Track your progress through 5 levels
+        </div>
+      </div>
+      <div id="trainingUploadSection">
+        <div class="upload-area" id="trainingUploadArea">
+          <div class="upload-icon">🎓</div>
+          <h2>Upload Training PDF</h2>
+          <p>Practice text recommended: 500+ words</p>
+        </div>
+        <input type="file" id="trainingFileInput" accept="application/pdf" style="display: none;">
+      </div>
+      <div id="trainingReaderSection" class="hidden">
+        <div class="file-info">
+          <span class="file-name" id="trainingFileName"></span>
+          <button class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 10px; border: none; cursor: pointer; color: white; font-size: 0.85rem; font-weight: 700;" onclick="loadNewTrainingFile()">New PDF</button>
+        </div>
+        <div class="reader-display">
+          <div class="word-display">
+            <span class="word-before" id="trainingWordBefore"></span><span class="word-orp" id="trainingWordOrp"></span><span class="word-after" id="trainingWordAfter"></span>
+          </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="trainingProgressFill"></div></div>
+        <div class="progress-text">
+          <span id="trainingProgressText">Word 0 of 0</span>
+          <span>Level <span id="trainingLevel">1</span>/5 • <span id="trainingWpm">200</span> WPM</span>
+        </div>
+        <div class="controls">
+          <button class="btn btn-training" onclick="startTraining()">
+            <span id="trainingIcon">🎯</span> <span id="trainingButtonText">Start Training</span>
+          </button>
+          <button class="btn btn-secondary" onclick="resetTraining()">🔄 Reset</button>
+        </div>
+      </div>
+    </div>
+    <div class="tab-content" id="searchTab">
+      <div id="searchUploadSection">
+        <div class="upload-area" id="searchUploadArea">
+          <div class="upload-icon">🔍</div>
+          <h2>Upload PDF to Search</h2>
+          <p>Find any text instantly with context</p>
+        </div>
+        <input type="file" id="searchFileInput" accept="application/pdf" style="display: none;">
+      </div>
+      <div id="searchSection" class="hidden">
+        <div class="file-info">
+          <span class="file-name" id="searchFileName"></span>
+          <button class="btn-secondary" style="padding: 0.5rem 1rem; border-radius: 10px; border: none; cursor: pointer; color: white; font-size: 0.85rem; font-weight: 700;" onclick="loadNewSearchFile()">New PDF</button>
+        </div>
+        <div class="search-box">
+          <input type="text" class="search-input" id="searchInput" placeholder="Search for any word or phrase...">
+          <button class="search-btn" onclick="performSearch()">Search</button>
+        </div>
+        <div id="searchResultsContainer"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    let words=[],currentIndex=0,isPlaying=false,wpm=300,interval=null,pdfPages=[];
+    let trainingWords=[],trainingIndex=0,trainingActive=false,trainingWpm=200,trainingLevel=1,trainingInterval=null,levelInterval=null;
+    function hideInstallBanner(){document.getElementById('installBanner').style.display='none';localStorage.setItem('installBannerHidden','true');}
+    if(localStorage.getItem('installBannerHidden')){document.getElementById('installBanner').style.display='none';}
+    function switchTab(tab){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});if(tab==='reader'){document.querySelectorAll('.tab')[0].classList.add('active');document.getElementById('readerTab').classList.add('active');}else if(tab==='training'){document.querySelectorAll('.tab')[1].classList.add('active');document.getElementById('trainingTab').classList.add('active');updateTrainingProgress();}else{document.querySelectorAll('.tab')[2].classList.add('active');document.getElementById('searchTab').classList.add('active');}}
+    document.getElementById('uploadArea').addEventListener('click',function(){document.getElementById('fileInput').click();});
+    document.getElementById('trainingUploadArea').addEventListener('click',function(){document.getElementById('trainingFileInput').click();});
+    document.getElementById('searchUploadArea').addEventListener('click',function(){document.getElementById('searchFileInput').click();});
+    document.getElementById('fileInput').addEventListener('change',function(e){const file=e.target.files[0];if(file)processReaderPDF(file);});
+    document.getElementById('trainingFileInput').addEventListener('change',function(e){const file=e.target.files[0];if(file)processTrainingPDF(file);});
+    document.getElementById('searchFileInput').addEventListener('change',function(e){const file=e.target.files[0];if(file)processSearchPDF(file);});
+    ['uploadArea','trainingUploadArea','searchUploadArea'].forEach(function(id){const area=document.getElementById(id);area.addEventListener('dragover',function(e){e.preventDefault();area.classList.add('dragover');});area.addEventListener('dragleave',function(){area.classList.remove('dragover');});area.addEventListener('drop',function(e){e.preventDefault();area.classList.remove('dragover');const file=e.dataTransfer.files[0];if(file&&file.type==='application/pdf'){if(id==='uploadArea')processReaderPDF(file);else if(id==='trainingUploadArea')processTrainingPDF(file);else processSearchPDF(file);}});});
+    async function processReaderPDF(file){try{const arrayBuffer=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument(arrayBuffer).promise;let fullText='';for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const textContent=await page.getTextContent();const pageHeight=page.view[3];const items=textContent.items.filter(function(item){const y=item.transform[5];return y>pageHeight*0.08&&y<pageHeight*0.92;});fullText+=items.map(function(item){return item.str;}).join(' ')+' ';}words=fullText.replace(/\s+/g,' ').trim().split(/\s+/).filter(function(w){return w.length>0;});currentIndex=0;document.getElementById('uploadSection').classList.add('hidden');document.getElementById('readerSection').classList.remove('hidden');document.getElementById('fileName').textContent=file.name;updateDisplay();}catch(error){alert('Error loading PDF. Please try another file.');}}
+    async function processTrainingPDF(file){try{const arrayBuffer=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument(arrayBuffer).promise;let fullText='';for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const textContent=await page.getTextContent();fullText+=textContent.items.map(function(item){return item.str;}).join(' ')+' ';}trainingWords=fullText.replace(/\s+/g,' ').trim().split(/\s+/).filter(function(w){return w.length>0;});trainingIndex=0;document.getElementById('trainingUploadSection').classList.add('hidden');document.getElementById('trainingReaderSection').classList.remove('hidden');document.getElementById('trainingFileName').textContent=file.name;updateTrainingDisplay();}catch(error){alert('Error loading PDF.');}}
+    async function processSearchPDF(file){try{const arrayBuffer=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument(arrayBuffer).promise;pdfPages=[];for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const textContent=await page.getTextContent();const pageText=textContent.items.map(function(item){return item.str;}).join(' ');pdfPages.push({pageNum:i,text:pageText});}document.getElementById('searchUploadSection').classList.add('hidden');document.getElementById('searchSection').classList.remove('hidden');document.getElementById('searchFileName').textContent=file.name;}catch(error){alert('Error loading PDF.');}}
+    function findORP(word){const len=word.length;if(len===1)return 0;if(len<=5)return 1;if(len<=9)return 2;if(len<=13)return 3;return 4;}
+    function updateDisplay(){if(words.length===0)return;const word=words[currentIndex];const orp=findORP(word);document.getElementById('wordBefore').textContent=word.slice(0,orp);document.getElementById('wordOrp').textContent=word[orp];document.getElementById('wordAfter').textContent=word.slice(orp+1);const progress=((currentIndex+1)/words.length)*100;document.getElementById('progressFill').style.width=progress+'%';document.getElementById('progressText').textContent='Word '+(currentIndex+1)+' of '+words.length;document.getElementById('progressPercent').textContent=Math.round(progress)+'%';}
+    function updateTrainingDisplay(){if(trainingWords.length===0)return;const word=trainingWords[trainingIndex];const orp=findORP(word);document.getElementById('trainingWordBefore').textContent=word.slice(0,orp);document.getElementById('trainingWordOrp').textContent=word[orp];document.getElementById('trainingWordAfter').textContent=word.slice(orp+1);const progress=((trainingIndex+1)/trainingWords.length)*100;document.getElementById('trainingProgressFill').style.width=progress+'%';document.getElementById('trainingProgressText').textContent='Word '+(trainingIndex+1)+' of '+trainingWords.length;}
+    function updateTrainingProgress(){const container=document.getElementById('trainingProgress');container.innerHTML='';for(let i=1;i<=5;i++){const step=document.createElement('div');step.className='training-step';if(i<=trainingLevel)step.classList.add('complete');container.appendChild(step);}}
+    function updateBadges(){document.querySelectorAll('.badge').forEach(function(b){b.classList.remove('active');});if(wpm>=150&&wpm<300){document.getElementById('badge150').classList.add('active');}else if(wpm>=300&&wpm<500){document.getElementById('badge300').classList.add('active');}else if(wpm>=500&&wpm<800){document.getElementById('badge500').classList.add('active');}else if(wpm>=800){document.getElementById('badge800').classList.add('active');}}
+    function togglePlay(){if(words.length===0)return;isPlaying=!isPlaying;if(isPlaying){document.getElementById('playIcon').textContent='⏸️';document.getElementById('playText').textContent='Pause';startReading();}else{document.getElementById('playIcon').textContent='▶️';document.getElementById('playText').textContent='Play';stopReading();}}
+    function startReading(){const delay=(60/wpm)*1000;interval=setInterval(function(){currentIndex++;if(currentIndex>=words.length){currentIndex=words.length-1;togglePlay();return;}updateDisplay();},delay);}
+    function stopReading(){if(interval){clearInterval(interval);interval=null;}}
+    function reset(){stopReading();isPlaying=false;currentIndex=0;document.getElementById('playIcon').textContent='▶️';document.getElementById('playText').textContent='Play';updateDisplay();}
+    function startTraining(){if(trainingWords.length===0)return;if(!trainingActive){trainingActive=true;trainingWpm=200;trainingLevel=1;trainingIndex=0;document.getElementById('trainingIcon').textContent='⏸️';document.getElementById('trainingButtonText').textContent='Pause';const delay=(60/trainingWpm)*1000;trainingInterval=setInterval(function(){trainingIndex++;if(trainingIndex>=trainingWords.length){trainingIndex=trainingWords.length-1;stopTraining();return;}updateTrainingDisplay();},delay);levelInterval=setInterval(function(){if(trainingLevel<5){trainingLevel++;trainingWpm+=50;document.getElementById('trainingLevel').textContent=trainingLevel;document.getElementById('trainingWpm').textContent=trainingWpm;updateTrainingProgress();if(trainingInterval)clearInterval(trainingInterval);const newDelay=(60/trainingWpm)*1000;trainingInterval=setInterval(function(){trainingIndex++;if(trainingIndex>=trainingWords.length){trainingIndex=trainingWords.length-1;stopTraining();return;}updateTrainingDisplay();},newDelay);}},30000);updateTrainingProgress();}else{stopTraining();}}
+    function stopTraining(){trainingActive=false;if(trainingInterval)clearInterval(trainingInterval);if(levelInterval)clearInterval(levelInterval);document.getElementById('trainingIcon').textContent='🎯';document.getElementById('trainingButtonText').textContent='Start Training';}
+    function resetTraining(){stopTraining();trainingIndex=0;trainingWpm=200;trainingLevel=
+1;document.getElementById('trainingLevel').textContent='1';document.getElementById('trainingWpm').textContent='200';updateTrainingDisplay();updateTrainingProgress();}
+function loadNewFile(){document.getElementById('uploadSection').classList.remove('hidden');document.getElementById('readerSection').classList.add('hidden');words=[];currentIndex=0;stopReading();}
+function loadNewTrainingFile(){document.getElementById('trainingUploadSection').classList.remove('hidden');document.getElementById('trainingReaderSection').classList.add('hidden');trainingWords=[];resetTraining();}
+function loadNewSearchFile(){document.getElementById('searchUploadSection').classList.remove('hidden');document.getElementById('searchSection').classList.add('hidden');pdfPages=[];document.getElementById('searchResultsContainer').innerHTML='';}
+function performSearch(){const query=document.getElementById('searchInput').value.trim();if(!query||pdfPages.length===0)return;const results=[];const lowerQuery=query.toLowerCase();pdfPages.forEach(function(page){const lowerText=page.text.toLowerCase();let index=lowerText.indexOf(lowerQuery);while(index!==-1){const start=Math.max(0,index-50);const end=Math.min(page.text.length,index+query.length+50);const context=page.text.substring(start,end);results.push({pageNum:page.pageNum,context:context});index=lowerText.indexOf(lowerQuery,index+1);}});displaySearchResults(results,query);}
+function displaySearchResults(results,query){const container=document.getElementById('searchResultsContainer');if(results.length===0){container.innerHTML='<div style="text-align: center; padding: 2rem; color: #64748b; font-weight: 600;">No results found</div>';return;}let html='<div class="search-results"><div style="padding: 1rem; font-weight: 700; color: #1e293b; font-size: 1.1rem;">Found '+results.length+' result'+(results.length!==1?'s':'')+'</div>';results.forEach(function(result){const highlightedContext=result.context.replace(new RegExp(query,'gi'),function(match){return'<span class="highlight">'+match+'</span>';});html+='<div class="search-result-item">';html+='<div><span class="result-page">Page '+result.pageNum+'</span></div>';html+='<div style="color: #475569; margin-top: 0.5rem;">...'+highlightedContext+'...</div>';html+='</div>';});html+='</div>';container.innerHTML=html;}
+document.getElementById('searchInput').addEventListener('keypress',function(e){if(e.key==='Enter')performSearch();});
+document.getElementById('wpmSlider').addEventListener('input',function(e){wpm=parseInt(e.target.value);document.getElementById('wpmDisplay').textContent=wpm;updateBadges();if(isPlaying){stopReading();startReading();}});
+updateBadges();updateTrainingProgress();
+</script>
+</body>
+</html>
+```
