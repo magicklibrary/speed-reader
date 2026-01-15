@@ -11,6 +11,7 @@
   <link rel="manifest" href="manifest.json">
   <title>Speed Reader</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -25,6 +26,9 @@
       color: #fff;
       min-height: 100vh;
       overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
     }
     
     /* Upload Screen */
@@ -79,6 +83,8 @@
       display: none;
       min-height: 100vh;
       position: relative;
+      width: 100%;
+      height: 100%;
     }
     
     .reader-screen.active {
@@ -91,6 +97,10 @@
       text-align: center;
       padding: 2rem;
       width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
     }
     
     .word-display {
@@ -99,6 +109,9 @@
       font-weight: bold;
       letter-spacing: 3px;
       line-height: 1.5;
+      max-width: 90vw;
+      word-wrap: break-word;
+      transition: font-size 0.2s;
     }
     
     .word-before {
@@ -107,18 +120,16 @@
     
     .word-orp {
       color: #ff0000;
-      font-size: 4.5rem;
+      font-size: 1.125em;
     }
     
     .word-after {
       color: #fff;
     }
     
-    /* Controls Menu */
-    .controls-btn {
+    /* Control Buttons */
+    .control-btn {
       position: fixed;
-      bottom: 2rem;
-      left: 2rem;
       width: 60px;
       height: 60px;
       background: #fff;
@@ -132,13 +143,30 @@
       box-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
       transition: all 0.3s;
       z-index: 1000;
+      opacity: 1;
     }
     
-    .controls-btn:hover {
+    .control-btn.fade {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .control-btn:hover {
       transform: scale(1.1);
       background: #ff0000;
     }
     
+    .settings-btn {
+      bottom: 2rem;
+      left: 2rem;
+    }
+    
+    .play-pause-btn {
+      bottom: 2rem;
+      right: 2rem;
+    }
+    
+    /* Controls Menu */
     .controls-menu {
       position: fixed;
       bottom: 0;
@@ -150,6 +178,8 @@
       transform: translateY(100%);
       transition: transform 0.3s;
       z-index: 999;
+      max-height: 60vh;
+      overflow-y: auto;
     }
     
     .controls-menu.active {
@@ -169,6 +199,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
+      flex-wrap: wrap;
     }
     
     .control-label {
@@ -188,6 +219,7 @@
     
     .wpm-slider {
       flex: 1;
+      min-width: 150px;
       height: 8px;
       border-radius: 10px;
       background: #333;
@@ -255,8 +287,121 @@
       margin-top: 1rem;
     }
     
+    /* OCR Section */
+    .ocr-section {
+      border-top: 1px solid #333;
+      padding-top: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .ocr-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 60px;
+      height: 30px;
+      background: #333;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .toggle-switch.active {
+      background: #ff0000;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 24px;
+      height: 24px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(30px);
+    }
+    
+    .ocr-warning {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid #ff0000;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.85rem;
+      color: #ff6666;
+      line-height: 1.5;
+    }
+    
+    .ocr-status {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    
+    .ocr-status.processing {
+      border: 1px solid #ff0000;
+      color: #ff0000;
+    }
+    
+    .ocr-status.ready {
+      border: 1px solid #00ff00;
+      color: #00ff00;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255, 0, 0, 0.3);
+      border-top-color: #ff0000;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
     .hidden {
-      display: none;
+      display: none !important;
+    }
+    
+    /* Landscape adjustments */
+    @media (orientation: landscape) {
+      .controls-menu {
+        max-height: 50vh;
+      }
+      
+      .word-display {
+        font-size: 3rem;
+      }
+      
+      .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+      }
+      
+      .settings-btn {
+        bottom: 1rem;
+        left: 1rem;
+      }
+      
+      .play-pause-btn {
+        bottom: 1rem;
+        right: 1rem;
+      }
     }
     
     /* Mobile Adjustments */
@@ -265,16 +410,20 @@
         font-size: 3rem;
       }
       
-      .word-orp {
-        font-size: 3.5rem;
-      }
-      
-      .controls-btn {
+      .control-btn {
         width: 50px;
         height: 50px;
+        font-size: 1.5rem;
+      }
+      
+      .settings-btn {
         bottom: 1.5rem;
         left: 1.5rem;
-        font-size: 1.5rem;
+      }
+      
+      .play-pause-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
       }
       
       .control-buttons {
@@ -283,6 +432,22 @@
       
       .btn {
         width: 100%;
+      }
+      
+      .control-item {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .wpm-value {
+        text-align: center;
+      }
+    }
+    
+    /* Very small screens */
+    @media (max-width: 480px) {
+      .word-display {
+        font-size: 2.5rem;
       }
     }
   </style>
@@ -301,13 +466,14 @@
   <!-- Reader Screen -->
   <div class="reader-screen" id="readerScreen">
     <div class="word-container">
-      <div class="word-display">
+      <div class="word-display" id="wordDisplayContainer">
         <span class="word-before" id="wordBefore"></span><span class="word-orp" id="wordOrp"></span><span class="word-after" id="wordAfter"></span>
       </div>
     </div>
     
-    <!-- Controls Button -->
-    <button class="controls-btn" id="controlsBtn">⚙️</button>
+    <!-- Control Buttons -->
+    <button class="control-btn settings-btn" id="settingsBtn">⚙️</button>
+    <button class="control-btn play-pause-btn" id="playPauseBtn">⏸️</button>
     
     <!-- Controls Menu -->
     <div class="controls-menu" id="controlsMenu">
@@ -321,7 +487,6 @@
         
         <!-- Action Buttons -->
         <div class="control-buttons">
-          <button class="btn" id="playBtn">▶️ Play</button>
           <button class="btn" id="resetBtn">🔄 Reset</button>
           <button class="btn btn-danger" id="exitBtn">❌ Exit</button>
         </div>
@@ -329,6 +494,22 @@
         <!-- Progress Info -->
         <div class="progress-info">
           <span id="progressText">Word 0 of 0</span> • <span id="progressPercent">0%</span>
+        </div>
+        
+        <!-- OCR Section -->
+        <div class="ocr-section">
+          <div class="ocr-toggle">
+            <span class="control-label">🔍 OCR Mode</span>
+            <div class="toggle-switch" id="ocrToggle">
+              <div class="toggle-slider"></div>
+            </div>
+          </div>
+          
+          <div class="ocr-warning">
+            ⚠️ OCR Mode for scanned PDFs. Requires internet connection. Pages buffer in advance to prevent delays.
+          </div>
+          
+          <div class="ocr-status hidden" id="ocrStatus"></div>
         </div>
       </div>
     </div>
@@ -351,24 +532,75 @@
     let isPlaying = false;
     let wpm = 300;
     let interval = null;
+    let ocrEnabled = false;
+    let ocrWorker = null;
+    let pageBuffer = {};
+    let currentPdf = null;
+    let isBuffering = false;
+    let fadeTimeout = null;
+    let autoStarted = false;
 
     // Elements
     const uploadScreen = document.getElementById('uploadScreen');
     const readerScreen = document.getElementById('readerScreen');
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
-    const controlsBtn = document.getElementById('controlsBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const playPauseBtn = document.getElementById('playPauseBtn');
     const controlsMenu = document.getElementById('controlsMenu');
     const wpmSlider = document.getElementById('wpmSlider');
     const wpmDisplay = document.getElementById('wpmDisplay');
-    const playBtn = document.getElementById('playBtn');
     const resetBtn = document.getElementById('resetBtn');
     const exitBtn = document.getElementById('exitBtn');
     const wordBefore = document.getElementById('wordBefore');
     const wordOrp = document.getElementById('wordOrp');
     const wordAfter = document.getElementById('wordAfter');
+    const wordDisplayContainer = document.getElementById('wordDisplayContainer');
     const progressText = document.getElementById('progressText');
     const progressPercent = document.getElementById('progressPercent');
+    const ocrToggle = document.getElementById('ocrToggle');
+    const ocrStatus = document.getElementById('ocrStatus');
+
+    // OCR Toggle
+    ocrToggle.addEventListener('click', () => {
+      ocrEnabled = !ocrEnabled;
+      ocrToggle.classList.toggle('active');
+      
+      if (ocrEnabled && !ocrWorker) {
+        initOCR();
+      }
+    });
+
+    // Initialize OCR Worker
+    async function initOCR() {
+      try {
+        ocrStatus.textContent = '⏳ Initializing OCR engine...';
+        ocrStatus.className = 'ocr-status processing';
+        ocrStatus.classList.remove('hidden');
+        
+        ocrWorker = await Tesseract.createWorker({
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              const percent = Math.round(m.progress * 100);
+              ocrStatus.innerHTML = `🔍 Processing page... ${percent}%`;
+            }
+          }
+        });
+        
+        await ocrWorker.loadLanguage('eng');
+        await ocrWorker.initialize('eng');
+        
+        ocrStatus.textContent = '✓ OCR Ready';
+        ocrStatus.className = 'ocr-status ready';
+        
+        setTimeout(() => {
+          ocrStatus.classList.add('hidden');
+        }, 2000);
+      } catch (error) {
+        ocrStatus.textContent = '❌ OCR initialization failed. Check internet connection.';
+        ocrStatus.className = 'ocr-status';
+      }
+    }
 
     // Upload Area Click
     uploadArea.addEventListener('click', () => {
@@ -405,34 +637,148 @@
       try {
         const arrayBuffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-        let fullText = '';
+        currentPdf = pdf;
         
-        for (let i = 1; i <= pdf.numPages; i++) {
+        // Try regular text extraction first
+        let fullText = '';
+        let hasText = false;
+        
+        for (let i = 1; i <= Math.min(3, pdf.numPages); i++) {
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
           const pageHeight = page.view[3];
           
-          // Filter out headers and footers (top 8% and bottom 8%)
           const items = textContent.items.filter(item => {
             const y = item.transform[5];
             return y > pageHeight * 0.08 && y < pageHeight * 0.92;
           });
           
-          fullText += items.map(item => item.str).join(' ') + ' ';
+          const pageText = items.map(item => item.str).join(' ');
+          if (pageText.trim().length > 50) {
+            hasText = true;
+          }
         }
         
-        // Split into words
-        words = fullText.replace(/\s+/g, ' ').trim().split(/\s+/).filter(w => w.length > 0);
-        currentIndex = 0;
-        
-        // Switch to reader screen
-        uploadScreen.classList.add('hidden');
-        readerScreen.classList.add('active');
-        
-        updateDisplay();
+        // If OCR is enabled or no text found, use OCR
+        if (ocrEnabled || !hasText) {
+          if (!ocrWorker) {
+            alert('OCR not initialized. Please enable OCR mode in settings first.');
+            return;
+          }
+          
+          ocrStatus.innerHTML = '🔍 Processing scanned PDF... <span class="spinner"></span>';
+          ocrStatus.className = 'ocr-status processing';
+          ocrStatus.classList.remove('hidden');
+          
+          await processPDFWithOCR(pdf);
+        } else {
+          // Process normally
+          fullText = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageHeight = page.view[3];
+            
+            const items = textContent.items.filter(item => {
+              const y = item.transform[5];
+              return y > pageHeight * 0.08 && y < pageHeight * 0.92;
+            });
+            
+            fullText += items.map(item => item.str).join(' ') + ' ';
+          }
+          
+          words = fullText.replace(/\s+/g, ' ').trim().split(/\s+/).filter(w => w.length > 0);
+          currentIndex = 0;
+          
+          uploadScreen.classList.add('hidden');
+          readerScreen.classList.add('active');
+          updateDisplay();
+          
+          // Auto-start playback
+          autoStartPlayback();
+        }
       } catch (error) {
         alert('Error loading PDF. Please try another file.');
       }
+    }
+
+    // Process PDF with OCR and buffering
+    async function processPDFWithOCR(pdf) {
+      words = [];
+      pageBuffer = {};
+      currentIndex = 0;
+      
+      // Start with first 3 pages
+      for (let i = 1; i <= Math.min(3, pdf.numPages); i++) {
+        const pageWords = await processPageWithOCR(pdf, i);
+        words = words.concat(pageWords);
+        pageBuffer[i] = pageWords;
+      }
+      
+      uploadScreen.classList.add('hidden');
+      readerScreen.classList.add('active');
+      updateDisplay();
+      
+      ocrStatus.textContent = '✓ Ready! Buffering remaining pages...';
+      ocrStatus.className = 'ocr-status ready';
+      
+      // Auto-start playback
+      autoStartPlayback();
+      
+      // Buffer remaining pages in background
+      bufferRemainingPages(pdf, 4);
+    }
+
+    // Auto-start playback
+    function autoStartPlayback() {
+      if (words.length > 0 && !isPlaying) {
+        isPlaying = true;
+        autoStarted = true;
+        playPauseBtn.textContent = '⏸️';
+        startReading();
+        startFadeTimer();
+      }
+    }
+
+    // Process single page with OCR
+    async function processPageWithOCR(pdf, pageNum) {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2.0 });
+      
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      
+      await page.render({ canvasContext: context, viewport: viewport }).promise;
+      
+      const { data } = await ocrWorker.recognize(canvas);
+      
+      return data.text.replace(/\s+/g, ' ').trim().split(/\s+/).filter(w => w.length > 0);
+    }
+
+    // Buffer remaining pages
+    async function bufferRemainingPages(pdf, startPage) {
+      isBuffering = true;
+      
+      for (let i = startPage; i <= pdf.numPages; i++) {
+        if (!isBuffering) break;
+        
+        const pageWords = await processPageWithOCR(pdf, i);
+        pageBuffer[i] = pageWords;
+        words = words.concat(pageWords);
+        
+        // Update status
+        const progress = Math.round((i / pdf.numPages) * 100);
+        ocrStatus.textContent = `📚 Buffered ${i}/${pdf.numPages} pages (${progress}%)`;
+      }
+      
+      ocrStatus.textContent = '✓ All pages ready!';
+      setTimeout(() => {
+        ocrStatus.classList.add('hidden');
+      }, 3000);
+      
+      isBuffering = false;
     }
 
     // Find Optimal Recognition Point (ORP)
@@ -445,6 +791,22 @@
       return 4;
     }
 
+    // Adjust font size for long words
+    function adjustFontSize(word) {
+      const baseSize = window.innerWidth < 768 ? 3 : 4;
+      const wordLength = word.length;
+      
+      if (wordLength > 20) {
+        wordDisplayContainer.style.fontSize = (baseSize * 0.6) + 'rem';
+      } else if (wordLength > 15) {
+        wordDisplayContainer.style.fontSize = (baseSize * 0.75) + 'rem';
+      } else if (wordLength > 12) {
+        wordDisplayContainer.style.fontSize = (baseSize * 0.85) + 'rem';
+      } else {
+        wordDisplayContainer.style.fontSize = baseSize + 'rem';
+      }
+    }
+
     // Update Display
     function updateDisplay() {
       if (words.length === 0) return;
@@ -452,8 +814,10 @@
       const word = words[currentIndex];
       const orp = findORP(word);
       
+      adjustFontSize(word);
+      
       wordBefore.textContent = word.slice(0, orp);
-      wordOrp.textContent = word[orp];
+      wordOrp.textContent = word[orp] || '';
       wordAfter.textContent = word.slice(orp + 1);
       
       const progress = ((currentIndex + 1) / words.length) * 100;
@@ -461,17 +825,97 @@
       progressPercent.textContent = `${Math.round(progress)}%`;
     }
 
-    // Controls Toggle
-    controlsBtn.addEventListener('click', () => {
+    // Settings Button
+    settingsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       controlsMenu.classList.toggle('active');
+      showButtons();
+      clearFadeTimer();
     });
+
+    // Play/Pause Button
+    playPauseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePlayPause();
+      showButtons();
+      if (isPlaying) {
+        startFadeTimer();
+      } else {
+        clearFadeTimer();
+      }
+    });
+
+    // Toggle Play/Pause
+    function togglePlayPause() {
+      if (words.length === 0) return;
+      
+      isPlaying = !isPlaying;
+      
+      if (isPlaying) {
+        playPauseBtn.textContent = '⏸️';
+        startReading();
+      } else {
+        playPauseBtn.textContent = '▶️';
+        stopReading();
+      }
+    }
 
     // Close controls when clicking outside
     readerScreen.addEventListener('click', (e) => {
-      if (!controlsMenu.contains(e.target) && e.target !== controlsBtn) {
-        controlsMenu.classList.remove('active');
+      if (!controlsMenu.contains(e.target) && 
+          e.target !== settingsBtn && 
+          e.target !== playPauseBtn) {
+        if (controlsMenu.classList.contains('active')) {
+          controlsMenu.classList.remove('active');
+        }
+        showButtons();
+        if (isPlaying) {
+          startFadeTimer();
+        }
       }
     });
+
+    // Touch/Click to show buttons
+    readerScreen.addEventListener('touchstart', (e) => {
+      if (!controlsMenu.contains(e.target) && 
+          e.target !== settingsBtn && 
+          e.target !== playPauseBtn) {
+        showButtons();
+        if (isPlaying) {
+          startFadeTimer();
+        }
+      }
+    });
+
+    // Show buttons
+    function showButtons() {
+      settingsBtn.classList.remove('fade');
+      playPauseBtn.classList.remove('fade');
+    }
+
+    // Hide buttons
+    function hideButtons() {
+      if (!controlsMenu.classList.contains('active')) {
+        settingsBtn.classList.add('fade');
+        playPauseBtn.classList.add('fade');
+      }
+    }
+
+    // Start fade timer
+    function startFadeTimer() {
+      clearFadeTimer();
+      fadeTimeout = setTimeout(() => {
+        hideButtons();
+      }, 15000);
+    }
+
+    // Clear fade timer
+    function clearFadeTimer() {
+      if (fadeTimeout) {
+        clearTimeout(fadeTimeout);
+        fadeTimeout = null;
+      }
+    }
 
     // WPM Slider
     wpmSlider.addEventListener('input', (e) => {
@@ -484,22 +928,6 @@
       }
     });
 
-    // Play/Pause Button
-    playBtn.addEventListener('click', () => {
-      if (words.length === 0) return;
-      
-      isPlaying = !isPlaying;
-      
-      if (isPlaying) {
-        playBtn.textContent = '⏸️ Pause';
-        startReading();
-        controlsMenu.classList.remove('active');
-      } else {
-        playBtn.textContent = '▶️ Play';
-        stopReading();
-      }
-    });
-
     // Start Reading
     function startReading() {
       const delay = (60 / wpm) * 1000;
@@ -508,8 +936,10 @@
         if (currentIndex >= words.length) {
           currentIndex = words.length - 1;
           stopReading();
-          playBtn.textContent = '▶️ Play';
+          playPauseBtn.textContent = '▶️';
           isPlaying = false;
+          showButtons();
+          clearFadeTimer();
           return;
         }
         updateDisplay();
@@ -529,46 +959,13 @@
       stopReading();
       isPlaying = false;
       currentIndex = 0;
-      playBtn.textContent = '▶️ Play';
+      playPauseBtn.textContent = '⏸️';
       updateDisplay();
+      autoStartPlayback();
     });
 
     // Exit Button
     exitBtn.addEventListener('click', () => {
       stopReading();
       isPlaying = false;
-      currentIndex = 0;
-      words = [];
-      playBtn.textContent = '▶️ Play';
-      readerScreen.classList.remove('active');
-      uploadScreen.classList.remove('hidden');
-      fileInput.value = '';
-    });
-
-    // Keyboard Shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (readerScreen.classList.contains('active')) {
-        if (e.code === 'Space') {
-          e.preventDefault();
-          playBtn.click();
-        } else if (e.code === 'Escape') {
-          e.preventDefault();
-          exitBtn.click();
-        } else if (e.code === 'ArrowLeft') {
-          e.preventDefault();
-          if (currentIndex > 0) {
-            currentIndex--;
-            updateDisplay();
-          }
-        } else if (e.code === 'ArrowRight') {
-          e.preventDefault();
-          if (currentIndex < words.length - 1) {
-            currentIndex++;
-            updateDisplay();
-          }
-        }
-      }
-    });
-  </script>
-</body>
-</html>
+      current
