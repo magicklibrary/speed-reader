@@ -7,11 +7,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Speed Reader">
   <meta name="theme-color" content="#000000">
-  <meta name="description" content="Minimal PDF speed reader">
-  <link rel="manifest" href="manifest.json">
   <title>Speed Reader</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -22,16 +21,16 @@
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #000;
-      color: #fff;
+      background: var(--bg-color, #000);
+      color: var(--text-color, #fff);
       min-height: 100vh;
       overflow: hidden;
       position: fixed;
       width: 100%;
       height: 100%;
+      transition: background-color 0.3s, color 0.3s;
     }
     
-    /* Upload Screen */
     .upload-screen {
       display: flex;
       align-items: center;
@@ -42,7 +41,7 @@
     }
     
     .upload-area {
-      border: 3px dashed #fff;
+      border: 3px dashed var(--text-color, #fff);
       border-radius: 20px;
       padding: 4rem 2rem;
       text-align: center;
@@ -53,12 +52,12 @@
     }
     
     .upload-area:hover {
-      border-color: #ff0000;
+      border-color: var(--anchor-color, #ff0000);
       transform: scale(1.02);
     }
     
     .upload-area.dragover {
-      border-color: #ff0000;
+      border-color: var(--anchor-color, #ff0000);
       background: rgba(255, 0, 0, 0.1);
     }
     
@@ -70,7 +69,6 @@
     .upload-area h2 {
       font-size: 1.8rem;
       margin-bottom: 0.5rem;
-      color: #fff;
     }
     
     .upload-area p {
@@ -78,7 +76,6 @@
       font-size: 1rem;
     }
     
-    /* Reader Screen */
     .reader-screen {
       display: none;
       min-height: 100vh;
@@ -105,34 +102,35 @@
     
     .word-display {
       font-size: 4rem;
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-family, 'Courier New'), monospace;
       font-weight: bold;
       letter-spacing: 3px;
       line-height: 1.5;
       max-width: 90vw;
       word-wrap: break-word;
       transition: font-size 0.2s;
+      color: var(--text-color, #fff);
     }
     
     .word-before {
-      color: #fff;
+      color: var(--text-color, #fff);
     }
     
     .word-orp {
-      color: #ff0000;
+      color: var(--anchor-color, #ff0000);
       font-size: 1.125em;
     }
     
     .word-after {
-      color: #fff;
+      color: var(--text-color, #fff);
     }
     
-    /* Control Buttons */
     .control-btn {
       position: fixed;
       width: 60px;
       height: 60px;
-      background: #fff;
+      background: var(--text-color, #fff);
+      color: var(--bg-color, #000);
       border: none;
       border-radius: 50%;
       cursor: pointer;
@@ -153,7 +151,8 @@
     
     .control-btn:hover {
       transform: scale(1.1);
-      background: #ff0000;
+      background: var(--anchor-color, #ff0000);
+      color: var(--text-color, #fff);
     }
     
     .settings-btn {
@@ -166,19 +165,18 @@
       right: 2rem;
     }
     
-    /* Controls Menu */
     .controls-menu {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: #1a1a1a;
+      background: var(--menu-bg, #1a1a1a);
       border-top: 2px solid #333;
       padding: 2rem;
       transform: translateY(100%);
       transition: transform 0.3s;
       z-index: 999;
-      max-height: 60vh;
+      max-height: 70vh;
       overflow-y: auto;
     }
     
@@ -205,13 +203,13 @@
     .control-label {
       font-size: 1.1rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-color, #fff);
       flex-shrink: 0;
     }
     
     .wpm-value {
       font-size: 1.5rem;
-      color: #ff0000;
+      color: var(--anchor-color, #ff0000);
       font-weight: bold;
       min-width: 80px;
       text-align: right;
@@ -232,7 +230,7 @@
       width: 24px;
       height: 24px;
       border-radius: 50%;
-      background: #ff0000;
+      background: var(--anchor-color, #ff0000);
       cursor: pointer;
     }
     
@@ -240,7 +238,7 @@
       width: 24px;
       height: 24px;
       border-radius: 50%;
-      background: #ff0000;
+      background: var(--anchor-color, #ff0000);
       cursor: pointer;
       border: none;
     }
@@ -254,9 +252,9 @@
     .btn {
       flex: 1;
       padding: 1rem 1.5rem;
-      border: 2px solid #fff;
+      border: 2px solid var(--text-color, #fff);
       background: transparent;
-      color: #fff;
+      color: var(--text-color, #fff);
       font-size: 1rem;
       font-weight: 700;
       border-radius: 12px;
@@ -266,18 +264,18 @@
     }
     
     .btn:hover {
-      background: #fff;
-      color: #000;
+      background: var(--text-color, #fff);
+      color: var(--bg-color, #000);
     }
     
     .btn-danger {
-      border-color: #ff0000;
-      color: #ff0000;
+      border-color: var(--anchor-color, #ff0000);
+      color: var(--anchor-color, #ff0000);
     }
     
     .btn-danger:hover {
-      background: #ff0000;
-      color: #fff;
+      background: var(--anchor-color, #ff0000);
+      color: var(--text-color, #fff);
     }
     
     .progress-info {
@@ -287,7 +285,39 @@
       margin-top: 1rem;
     }
     
-    /* OCR Section */
+    .color-picker-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .color-input {
+      width: 60px;
+      height: 40px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      background: transparent;
+    }
+    
+    .font-select {
+      flex: 1;
+      min-width: 150px;
+      padding: 0.8rem;
+      background: #333;
+      color: var(--text-color, #fff);
+      border: 2px solid #555;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    
+    .section-divider {
+      border-top: 1px solid #333;
+      margin: 1.5rem 0;
+    }
+    
     .ocr-section {
       border-top: 1px solid #333;
       padding-top: 1.5rem;
@@ -312,7 +342,7 @@
     }
     
     .toggle-switch.active {
-      background: #ff0000;
+      background: var(--anchor-color, #ff0000);
     }
     
     .toggle-slider {
@@ -332,7 +362,7 @@
     
     .ocr-warning {
       background: rgba(255, 0, 0, 0.1);
-      border: 1px solid #ff0000;
+      border: 1px solid var(--anchor-color, #ff0000);
       border-radius: 8px;
       padding: 1rem;
       font-size: 0.85rem;
@@ -350,8 +380,8 @@
     }
     
     .ocr-status.processing {
-      border: 1px solid #ff0000;
-      color: #ff0000;
+      border: 1px solid var(--anchor-color, #ff0000);
+      color: var(--anchor-color, #ff0000);
     }
     
     .ocr-status.ready {
@@ -359,12 +389,74 @@
       color: #00ff00;
     }
     
+    .binaural-section {
+      border-top: 1px solid #333;
+      padding-top: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .binaural-presets {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+    
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: left;
+    }
+    
+    .preset-btn:hover {
+      border-color: var(--anchor-color, #ff0000);
+      background: rgba(255, 0, 0, 0.1);
+    }
+    
+    .preset-btn.active {
+      border-color: var(--anchor-color, #ff0000);
+      background: rgba(255, 0, 0, 0.15);
+    }
+    
+    .preset-name {
+      font-weight: bold;
+      font-size: 1rem;
+      color: var(--text-color, #fff);
+      margin-bottom: 0.3rem;
+    }
+    
+    .preset-desc {
+      font-size: 0.75rem;
+      color: #999;
+      line-height: 1.3;
+    }
+    
+    .custom-freq-input {
+      width: 80px;
+      padding: 0.6rem;
+      background: #333;
+      color: var(--text-color, #fff);
+      border: 2px solid #555;
+      border-radius: 8px;
+      font-size: 1rem;
+      text-align: center;
+    }
+    
+    .custom-freq-input:focus {
+      outline: none;
+      border-color: var(--anchor-color, #ff0000);
+    }
+    
     .spinner {
       display: inline-block;
       width: 12px;
       height: 12px;
       border: 2px solid rgba(255, 0, 0, 0.3);
-      border-top-color: #ff0000;
+      border-top-color: var(--anchor-color, #ff0000);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -377,7 +469,6 @@
       display: none !important;
     }
     
-    /* Landscape adjustments */
     @media (orientation: landscape) {
       .controls-menu {
         max-height: 50vh;
@@ -404,7 +495,6 @@
       }
     }
     
-    /* Mobile Adjustments */
     @media (max-width: 768px) {
       .word-display {
         font-size: 3rem;
@@ -444,7 +534,6 @@
       }
     }
     
-    /* Very small screens */
     @media (max-width: 480px) {
       .word-display {
         font-size: 2.5rem;
@@ -453,17 +542,15 @@
   </style>
 </head>
 <body>
-  <!-- Upload Screen -->
   <div class="upload-screen" id="uploadScreen">
     <div class="upload-area" id="uploadArea">
       <div class="upload-icon">📄</div>
-      <h2>Drop PDF Here</h2>
-      <p>Click or drag to upload</p>
+      <h2>Drop Document Here</h2>
+      <p>PDF, DOCX, TXT supported</p>
     </div>
-    <input type="file" id="fileInput" accept="application/pdf" style="display: none;">
+    <input type="file" id="fileInput" accept=".pdf,.docx,.doc,.txt" style="display: none;">
   </div>
 
-  <!-- Reader Screen -->
   <div class="reader-screen" id="readerScreen">
     <div class="word-container">
       <div class="word-display" id="wordDisplayContainer">
@@ -471,32 +558,65 @@
       </div>
     </div>
     
-    <!-- Control Buttons -->
     <button class="control-btn settings-btn" id="settingsBtn">⚙️</button>
     <button class="control-btn play-pause-btn" id="playPauseBtn">⏸️</button>
     
-    <!-- Controls Menu -->
     <div class="controls-menu" id="controlsMenu">
       <div class="controls-grid">
-        <!-- Speed Control -->
         <div class="control-item">
           <span class="control-label">Speed</span>
           <input type="range" class="wpm-slider" id="wpmSlider" min="100" max="1000" step="50" value="300">
           <span class="wpm-value" id="wpmDisplay">300 WPM</span>
         </div>
         
-        <!-- Action Buttons -->
-        <div class="control-buttons">
-          <button class="btn" id="resetBtn">🔄 Reset</button>
-          <button class="btn btn-danger" id="exitBtn">❌ Exit</button>
+        <div class="section-divider"></div>
+        
+        <div class="control-item">
+          <span class="control-label">Font</span>
+          <select class="font-select" id="fontSelect">
+            <option value="'Courier New', monospace">Courier New</option>
+            <option value="'Arial', sans-serif">Arial</option>
+            <option value="'Georgia', serif">Georgia</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="'Verdana', sans-serif">Verdana</option>
+            <option value="'Helvetica', sans-serif">Helvetica</option>
+            <option value="'Roboto', sans-serif">Roboto</option>
+            <option value="'Open Sans', sans-serif">Open Sans</option>
+          </select>
         </div>
         
-        <!-- Progress Info -->
+        <div class="control-item">
+          <span class="control-label">Background</span>
+          <div class="color-picker-group">
+            <input type="color" class="color-input" id="bgColorPicker" value="#000000">
+          </div>
+        </div>
+        
+        <div class="control-item">
+          <span class="control-label">Text Color</span>
+          <div class="color-picker-group">
+            <input type="color" class="color-input" id="textColorPicker" value="#ffffff">
+          </div>
+        </div>
+        
+        <div class="control-item">
+          <span class="control-label">Anchor Color</span>
+          <div class="color-picker-group">
+            <input type="color" class="color-input" id="anchorColorPicker" value="#ff0000">
+          </div>
+        </div>
+        
+        <div class="section-divider"></div>
+        
+        <div class="control-buttons">
+          <button class="btn" id="resetBtn">🔄 Reset</button>
+          <button class="btn btn-danger" id="exitBtn">✖ Exit</button>
+        </div>
+        
         <div class="progress-info">
           <span id="progressText">Word 0 of 0</span> • <span id="progressPercent">0%</span>
         </div>
         
-        <!-- OCR Section -->
         <div class="ocr-section">
           <div class="ocr-toggle">
             <span class="control-label">🔍 OCR Mode</span>
@@ -506,27 +626,78 @@
           </div>
           
           <div class="ocr-warning">
-            ⚠️ OCR Mode for scanned PDFs. Requires internet connection. Pages buffer in advance to prevent delays.
+            ⚠️ OCR Mode for scanned PDFs. Requires internet connection.
           </div>
           
           <div class="ocr-status hidden" id="ocrStatus"></div>
+        </div>
+        
+        <div class="section-divider"></div>
+        
+        <div class="binaural-section">
+          <div class="ocr-toggle">
+            <span class="control-label">🎧 Binaural Beats</span>
+            <div class="toggle-switch" id="binauralToggle">
+              <div class="toggle-slider"></div>
+            </div>
+          </div>
+          
+          <div class="ocr-warning">
+            ⚠️ Requires headphones for proper effect. Optional feature to enhance focus and learning.
+          </div>
+          
+          <div id="binauralControls" class="hidden" style="margin-top: 1rem;">
+            <div class="control-item" style="margin-bottom: 1rem;">
+              <span class="control-label">Preset Modes</span>
+            </div>
+            
+            <div class="binaural-presets">
+              <button class="preset-btn" data-mode="theta">
+                <div class="preset-name">🌙 Theta (5 Hz)</div>
+                <div class="preset-desc">Deep relaxation & sleep reading</div>
+              </button>
+              <button class="preset-btn" data-mode="alpha">
+                <div class="preset-name">🧘 Alpha (10 Hz)</div>
+                <div class="preset-desc">Calm learning & creativity</div>
+              </button>
+              <button class="preset-btn active" data-mode="beta">
+                <div class="preset-name">⚡ Beta (15 Hz)</div>
+                <div class="preset-desc">Focus & active learning (recommended)</div>
+              </button>
+              <button class="preset-btn" data-mode="gamma">
+                <div class="preset-name">🎯 Gamma (40 Hz)</div>
+                <div class="preset-desc">High alertness & peak performance</div>
+              </button>
+            </div>
+            
+            <div class="section-divider" style="margin: 1rem 0;"></div>
+            
+            <div class="control-item">
+              <span class="control-label">Custom Frequency</span>
+              <input type="number" class="custom-freq-input" id="customFreq" min="1" max="100" value="15" step="0.5">
+              <span style="color: #999; font-size: 0.9rem;">Hz</span>
+            </div>
+            
+            <div class="control-item" style="margin-top: 1rem;">
+              <span class="control-label">Volume</span>
+              <input type="range" class="wpm-slider" id="volumeSlider" min="0" max="100" step="5" value="30">
+              <span class="wpm-value" id="volumeDisplay">30%</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').catch(() => {});
       });
     }
 
-    // PDF.js Configuration
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    // State
     let words = [];
     let currentIndex = 0;
     let isPlaying = false;
@@ -534,13 +705,8 @@
     let interval = null;
     let ocrEnabled = false;
     let ocrWorker = null;
-    let pageBuffer = {};
-    let currentPdf = null;
-    let isBuffering = false;
     let fadeTimeout = null;
-    let autoStarted = false;
 
-    // Elements
     const uploadScreen = document.getElementById('uploadScreen');
     const readerScreen = document.getElementById('readerScreen');
     const uploadArea = document.getElementById('uploadArea');
@@ -560,21 +726,234 @@
     const progressPercent = document.getElementById('progressPercent');
     const ocrToggle = document.getElementById('ocrToggle');
     const ocrStatus = document.getElementById('ocrStatus');
+    const fontSelect = document.getElementById('fontSelect');
+    const bgColorPicker = document.getElementById('bgColorPicker');
+    const textColorPicker = document.getElementById('textColorPicker');
+    const anchorColorPicker = document.getElementById('anchorColorPicker');
+    const binauralToggle = document.getElementById('binauralToggle');
+    const binauralControls = document.getElementById('binauralControls');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeDisplay = document.getElementById('volumeDisplay');
+    const customFreq = document.getElementById('customFreq');
+    const presetButtons = document.querySelectorAll('.preset-btn');
 
-    // OCR Toggle
-    ocrToggle.addEventListener('click', () => {
-      ocrEnabled = !ocrEnabled;
-      ocrToggle.classList.toggle('active');
+    // Binaural Beats Audio Context
+    let audioContext = null;
+    let leftOscillator = null;
+    let rightOscillator = null;
+    let gainNode = null;
+    let binauralEnabled = false;
+    let currentFrequency = 15; // Beta (focus) - recommended default
+    let currentVolume = 0.3;
+
+    // Binaural presets with research-backed frequencies
+    const binauralPresets = {
+      theta: { freq: 5, base: 200, name: 'Theta' }, // Deep relaxation, pre-sleep reading
+      alpha: { freq: 10, base: 200, name: 'Alpha' }, // Relaxed learning, creativity
+      beta: { freq: 15, base: 200, name: 'Beta' }, // Active focus, best for learning
+      gamma: { freq: 40, base: 200, name: 'Gamma' } // High alertness, peak performance
+    };
+
+    // Load saved preferences
+    const savedFont = localStorage.getItem('fontFamily');
+    const savedBg = localStorage.getItem('bgColor');
+    const savedText = localStorage.getItem('textColor');
+    const savedAnchor = localStorage.getItem('anchorColor');
+    
+    if (savedFont) {
+      fontSelect.value = savedFont;
+      document.documentElement.style.setProperty('--font-family', savedFont);
+    }
+    if (savedBg) {
+      bgColorPicker.value = savedBg;
+      document.documentElement.style.setProperty('--bg-color', savedBg);
+      document.documentElement.style.setProperty('--menu-bg', lightenColor(savedBg, 10));
+    }
+    if (savedText) {
+      textColorPicker.value = savedText;
+      document.documentElement.style.setProperty('--text-color', savedText);
+    }
+    if (savedAnchor) {
+      anchorColorPicker.value = savedAnchor;
+      document.documentElement.style.setProperty('--anchor-color', savedAnchor);
+    }
+
+    // Color and font handlers
+    fontSelect.addEventListener('change', (e) => {
+      const font = e.target.value;
+      document.documentElement.style.setProperty('--font-family', font);
+      localStorage.setItem('fontFamily', font);
+    });
+
+    bgColorPicker.addEventListener('input', (e) => {
+      const color = e.target.value;
+      document.documentElement.style.setProperty('--bg-color', color);
+      document.documentElement.style.setProperty('--menu-bg', lightenColor(color, 10));
+      localStorage.setItem('bgColor', color);
+    });
+
+    textColorPicker.addEventListener('input', (e) => {
+      const color = e.target.value;
+      document.documentElement.style.setProperty('--text-color', color);
+      localStorage.setItem('textColor', color);
+    });
+
+    anchorColorPicker.addEventListener('input', (e) => {
+      const color = e.target.value;
+      document.documentElement.style.setProperty('--anchor-color', color);
+      localStorage.setItem('anchorColor', color);
+    });
+
+    // Binaural Beats Toggle
+    binauralToggle.addEventListener('click', () => {
+      binauralEnabled = !binauralEnabled;
+      binauralToggle.classList.toggle('active');
+      binauralControls.classList.toggle('hidden');
       
-      if (ocrEnabled && !ocrWorker) {
-        initOCR();
+      if (binauralEnabled) {
+        initBinauralBeats();
+      } else {
+        stopBinauralBeats();
       }
     });
 
-    // Initialize OCR Worker
+    // Initialize Binaural Beats
+    function initBinauralBeats() {
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        gainNode = audioContext.createGain();
+        gainNode.gain.value = currentVolume;
+        gainNode.connect(audioContext.destination);
+        
+        startBinauralTone(currentFrequency);
+      } catch (error) {
+        alert('Audio not supported in this browser');
+        binauralEnabled = false;
+        binauralToggle.classList.remove('active');
+        binauralControls.classList.add('hidden');
+      }
+    }
+
+    // Start Binaural Tone
+    function startBinauralTone(beatFreq) {
+      if (!audioContext) return;
+      
+      stopBinauralTone();
+      
+      const baseFreq = 200;
+      
+      // Left channel
+      leftOscillator = audioContext.createOscillator();
+      leftOscillator.frequency.value = baseFreq;
+      leftOscillator.type = 'sine';
+      
+      const leftGain = audioContext.createGain();
+      leftGain.gain.value = 0.5;
+      
+      const leftMerger = audioContext.createChannelMerger(2);
+      leftOscillator.connect(leftGain);
+      leftGain.connect(leftMerger, 0, 0);
+      
+      // Right channel
+      rightOscillator = audioContext.createOscillator();
+      rightOscillator.frequency.value = baseFreq + beatFreq;
+      rightOscillator.type = 'sine';
+      
+      const rightGain = audioContext.createGain();
+      rightGain.gain.value = 0.5;
+      
+      const rightMerger = audioContext.createChannelMerger(2);
+      rightOscillator.connect(rightGain);
+      rightGain.connect(rightMerger, 0, 1);
+      
+      // Merge and connect
+      leftMerger.connect(gainNode);
+      rightMerger.connect(gainNode);
+      
+      leftOscillator.start();
+      rightOscillator.start();
+    }
+
+    // Stop Binaural Tone
+    function stopBinauralTone() {
+      if (leftOscillator) {
+        leftOscillator.stop();
+        leftOscillator = null;
+      }
+      if (rightOscillator) {
+        rightOscillator.stop();
+        rightOscillator = null;
+      }
+    }
+
+    // Stop Binaural Beats
+    function stopBinauralBeats() {
+      stopBinauralTone();
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+    }
+
+    // Preset Buttons
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.mode;
+        const preset = binauralPresets[mode];
+        
+        presetButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        currentFrequency = preset.freq;
+        customFreq.value = preset.freq;
+        
+        if (binauralEnabled && audioContext) {
+          startBinauralTone(currentFrequency);
+        }
+      });
+    });
+
+    // Custom Frequency Input
+    customFreq.addEventListener('input', (e) => {
+      const freq = parseFloat(e.target.value);
+      if (freq >= 1 && freq <= 100) {
+        currentFrequency = freq;
+        presetButtons.forEach(b => b.classList.remove('active'));
+        
+        if (binauralEnabled && audioContext) {
+          startBinauralTone(currentFrequency);
+        }
+      }
+    });
+
+    // Volume Slider
+    volumeSlider.addEventListener('input', (e) => {
+      const volume = parseInt(e.target.value);
+      currentVolume = volume / 100;
+      volumeDisplay.textContent = `${volume}%`;
+      
+      if (gainNode) {
+        gainNode.gain.value = currentVolume;
+      }
+    });
+
+    function lightenColor(hex, percent) {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const r = Math.min(255, ((num >> 16) & 0xff) + percent);
+      const g = Math.min(255, ((num >> 8) & 0xff) + percent);
+      const b = Math.min(255, (num & 0xff) + percent);
+      return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+    }
+
+    ocrToggle.addEventListener('click', () => {
+      ocrEnabled = !ocrEnabled;
+      ocrToggle.classList.toggle('active');
+      if (ocrEnabled && !ocrWorker) initOCR();
+    });
+
     async function initOCR() {
       try {
-        ocrStatus.textContent = '⏳ Initializing OCR engine...';
+        ocrStatus.textContent = '⏳ Initializing OCR...';
         ocrStatus.className = 'ocr-status processing';
         ocrStatus.classList.remove('hidden');
         
@@ -582,7 +961,7 @@
           logger: m => {
             if (m.status === 'recognizing text') {
               const percent = Math.round(m.progress * 100);
-              ocrStatus.innerHTML = `🔍 Processing page... ${percent}%`;
+              ocrStatus.innerHTML = `🔍 Processing... ${percent}%`;
             }
           }
         });
@@ -592,58 +971,79 @@
         
         ocrStatus.textContent = '✓ OCR Ready';
         ocrStatus.className = 'ocr-status ready';
-        
-        setTimeout(() => {
-          ocrStatus.classList.add('hidden');
-        }, 2000);
+        setTimeout(() => ocrStatus.classList.add('hidden'), 2000);
       } catch (error) {
-        ocrStatus.textContent = '❌ OCR initialization failed. Check internet connection.';
+        ocrStatus.textContent = '✖ OCR failed. Check connection.';
         ocrStatus.className = 'ocr-status';
       }
     }
 
-    // Upload Area Click
-    uploadArea.addEventListener('click', () => {
-      fileInput.click();
-    });
-
-    // File Input Change
+    uploadArea.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
-      if (file) processReaderPDF(file);
+      if (file) processFile(file);
     });
 
-    // Drag and Drop
     uploadArea.addEventListener('dragover', (e) => {
       e.preventDefault();
       uploadArea.classList.add('dragover');
     });
-
-    uploadArea.addEventListener('dragleave', () => {
-      uploadArea.classList.remove('dragover');
-    });
-
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
     uploadArea.addEventListener('drop', (e) => {
       e.preventDefault();
       uploadArea.classList.remove('dragover');
       const file = e.dataTransfer.files[0];
-      if (file && file.type === 'application/pdf') {
-        processReaderPDF(file);
-      }
+      if (file) processFile(file);
     });
 
-    // Process PDF
-    async function processReaderPDF(file) {
+    async function processFile(file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      
       try {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-        currentPdf = pdf;
+        if (ext === 'pdf') {
+          await processPDF(file);
+        } else if (ext === 'docx' || ext === 'doc') {
+          await processDOCX(file);
+        } else if (ext === 'txt') {
+          await processTXT(file);
+        } else {
+          alert('Unsupported file type');
+          return;
+        }
         
-        // Try regular text extraction first
-        let fullText = '';
-        let hasText = false;
-        
-        for (let i = 1; i <= Math.min(3, pdf.numPages); i++) {
+        if (words.length > 0) {
+          uploadScreen.classList.add('hidden');
+          readerScreen.classList.add('active');
+          updateDisplay();
+          autoStart();
+        }
+      } catch (error) {
+        alert('Error processing file: ' + error.message);
+      }
+    }
+
+    async function processPDF(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+      
+      let fullText = '';
+      let hasText = false;
+      
+      for (let i = 1; i <= Math.min(3, pdf.numPages); i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        if (pageText.trim().length > 50) hasText = true;
+      }
+      
+      if (ocrEnabled || !hasText) {
+        if (!ocrWorker) {
+          alert('Enable OCR in settings first');
+          return;
+        }
+        await processPDFWithOCR(pdf);
+      } else {
+        for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i);
           const textContent = await page.getTextContent();
           const pageHeight = page.view[3];
@@ -653,135 +1053,69 @@
             return y > pageHeight * 0.08 && y < pageHeight * 0.92;
           });
           
-          const pageText = items.map(item => item.str).join(' ');
-          if (pageText.trim().length > 50) {
-            hasText = true;
-          }
+          fullText += items.map(item => item.str).join(' ') + ' ';
         }
         
-        // If OCR is enabled or no text found, use OCR
-        if (ocrEnabled || !hasText) {
-          if (!ocrWorker) {
-            alert('OCR not initialized. Please enable OCR mode in settings first.');
-            return;
-          }
-          
-          ocrStatus.innerHTML = '🔍 Processing scanned PDF... <span class="spinner"></span>';
-          ocrStatus.className = 'ocr-status processing';
-          ocrStatus.classList.remove('hidden');
-          
-          await processPDFWithOCR(pdf);
-        } else {
-          // Process normally
-          fullText = '';
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            const pageHeight = page.view[3];
-            
-            const items = textContent.items.filter(item => {
-              const y = item.transform[5];
-              return y > pageHeight * 0.08 && y < pageHeight * 0.92;
-            });
-            
-            fullText += items.map(item => item.str).join(' ') + ' ';
-          }
-          
-          words = fullText.replace(/\s+/g, ' ').trim().split(/\s+/).filter(w => w.length > 0);
-          currentIndex = 0;
-          
-          uploadScreen.classList.add('hidden');
-          readerScreen.classList.add('active');
-          updateDisplay();
-          
-          // Auto-start playback
-          autoStartPlayback();
-        }
-      } catch (error) {
-        alert('Error loading PDF. Please try another file.');
+        fullText = cleanText(fullText);
+        words = fullText.split(/\s+/).filter(w => w.length > 0);
+        currentIndex = 0;
       }
     }
 
-    // Process PDF with OCR and buffering
     async function processPDFWithOCR(pdf) {
       words = [];
-      pageBuffer = {};
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 2.0 });
+        
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        
+        await page.render({ canvasContext: context, viewport: viewport }).promise;
+        const { data } = await ocrWorker.recognize(canvas);
+        
+        const pageText = cleanText(data.text);
+        words = words.concat(pageText.split(/\s+/).filter(w => w.length > 0));
+      }
       currentIndex = 0;
-      
-      // Start with first 3 pages
-      for (let i = 1; i <= Math.min(3, pdf.numPages); i++) {
-        const pageWords = await processPageWithOCR(pdf, i);
-        words = words.concat(pageWords);
-        pageBuffer[i] = pageWords;
-      }
-      
-      uploadScreen.classList.add('hidden');
-      readerScreen.classList.add('active');
-      updateDisplay();
-      
-      ocrStatus.textContent = '✓ Ready! Buffering remaining pages...';
-      ocrStatus.className = 'ocr-status ready';
-      
-      // Auto-start playback
-      autoStartPlayback();
-      
-      // Buffer remaining pages in background
-      bufferRemainingPages(pdf, 4);
     }
 
-    // Auto-start playback
-    function autoStartPlayback() {
-      if (words.length > 0 && !isPlaying) {
-        isPlaying = true;
-        autoStarted = true;
-        playPauseBtn.textContent = '⏸️';
-        startReading();
-        startFadeTimer();
-      }
+    async function processDOCX(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+      const text = cleanText(result.value);
+      words = text.split(/\s+/).filter(w => w.length > 0);
+      currentIndex = 0;
     }
 
-    // Process single page with OCR
-    async function processPageWithOCR(pdf, pageNum) {
-      const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 2.0 });
-      
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      
-      await page.render({ canvasContext: context, viewport: viewport }).promise;
-      
-      const { data } = await ocrWorker.recognize(canvas);
-      
-      return data.text.replace(/\s+/g, ' ').trim().split(/\s+/).filter(w => w.length > 0);
+    async function processTXT(file) {
+      const text = await file.text();
+      const cleanedText = cleanText(text);
+      words = cleanedText.split(/\s+/).filter(w => w.length > 0);
+      currentIndex = 0;
     }
 
-    // Buffer remaining pages
-    async function bufferRemainingPages(pdf, startPage) {
-      isBuffering = true;
+    function cleanText(text) {
+      const tocPatterns = [
+        /table\s+of\s+contents[\s\S]{0,500}?(?=chapter|introduction|preface|\n\n)/i,
+        /contents[\s\S]{0,300}?(?=chapter|part|introduction|\d+\s*\n)/i,
+        /isbn[:\s-]*[\dxX-]+/gi,
+        /copyright\s*©[\s\S]{0,200}/gi,
+        /all\s+rights\s+reserved[\s\S]{0,100}/gi,
+        /published\s+by[\s\S]{0,150}/gi
+      ];
       
-      for (let i = startPage; i <= pdf.numPages; i++) {
-        if (!isBuffering) break;
-        
-        const pageWords = await processPageWithOCR(pdf, i);
-        pageBuffer[i] = pageWords;
-        words = words.concat(pageWords);
-        
-        // Update status
-        const progress = Math.round((i / pdf.numPages) * 100);
-        ocrStatus.textContent = `📚 Buffered ${i}/${pdf.numPages} pages (${progress}%)`;
-      }
+      let cleaned = text;
+      tocPatterns.forEach(pattern => {
+        cleaned = cleaned.replace(pattern, ' ');
+      });
       
-      ocrStatus.textContent = '✓ All pages ready!';
-      setTimeout(() => {
-        ocrStatus.classList.add('hidden');
-      }, 3000);
-      
-      isBuffering = false;
+      cleaned = cleaned.replace(/\s+/g, ' ').trim();
+      return cleaned;
     }
 
-    // Find Optimal Recognition Point (ORP)
     function findORP(word) {
       const len = word.length;
       if (len === 1) return 0;
@@ -791,12 +1125,13 @@
       return 4;
     }
 
-    // Adjust font size for long words
     function adjustFontSize(word) {
       const baseSize = window.innerWidth < 768 ? 3 : 4;
       const wordLength = word.length;
       
-      if (wordLength > 20) {
+      if (wordLength > 25) {
+        wordDisplayContainer.style.fontSize = (baseSize * 0.5) + 'rem';
+      } else if (wordLength > 20) {
         wordDisplayContainer.style.fontSize = (baseSize * 0.6) + 'rem';
       } else if (wordLength > 15) {
         wordDisplayContainer.style.fontSize = (baseSize * 0.75) + 'rem';
@@ -807,7 +1142,6 @@
       }
     }
 
-    // Update Display
     function updateDisplay() {
       if (words.length === 0) return;
       
@@ -825,7 +1159,15 @@
       progressPercent.textContent = `${Math.round(progress)}%`;
     }
 
-    // Settings Button
+    function autoStart() {
+      if (words.length > 0 && !isPlaying) {
+        isPlaying = true;
+        playPauseBtn.textContent = '⏸️';
+        startReading();
+        startFadeTimer();
+      }
+    }
+
     settingsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       controlsMenu.classList.toggle('active');
@@ -833,7 +1175,6 @@
       clearFadeTimer();
     });
 
-    // Play/Pause Button
     playPauseBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       togglePlayPause();
@@ -845,7 +1186,6 @@
       }
     });
 
-    // Toggle Play/Pause
     function togglePlayPause() {
       if (words.length === 0) return;
       
@@ -860,7 +1200,6 @@
       }
     }
 
-    // Close controls when clicking outside
     readerScreen.addEventListener('click', (e) => {
       if (!controlsMenu.contains(e.target) && 
           e.target !== settingsBtn && 
@@ -875,7 +1214,6 @@
       }
     });
 
-    // Touch/Click to show buttons
     readerScreen.addEventListener('touchstart', (e) => {
       if (!controlsMenu.contains(e.target) && 
           e.target !== settingsBtn && 
@@ -887,13 +1225,20 @@
       }
     });
 
-    // Show buttons
+    document.addEventListener('mousemove', () => {
+      if (readerScreen.classList.contains('active')) {
+        showButtons();
+        if (isPlaying && !controlsMenu.classList.contains('active')) {
+          startFadeTimer();
+        }
+      }
+    });
+
     function showButtons() {
       settingsBtn.classList.remove('fade');
       playPauseBtn.classList.remove('fade');
     }
 
-    // Hide buttons
     function hideButtons() {
       if (!controlsMenu.classList.contains('active')) {
         settingsBtn.classList.add('fade');
@@ -901,7 +1246,6 @@
       }
     }
 
-    // Start fade timer
     function startFadeTimer() {
       clearFadeTimer();
       fadeTimeout = setTimeout(() => {
@@ -909,7 +1253,6 @@
       }, 15000);
     }
 
-    // Clear fade timer
     function clearFadeTimer() {
       if (fadeTimeout) {
         clearTimeout(fadeTimeout);
@@ -917,7 +1260,6 @@
       }
     }
 
-    // WPM Slider
     wpmSlider.addEventListener('input', (e) => {
       wpm = parseInt(e.target.value);
       wpmDisplay.textContent = `${wpm} WPM`;
@@ -928,7 +1270,6 @@
       }
     });
 
-    // Start Reading
     function startReading() {
       const delay = (60 / wpm) * 1000;
       interval = setInterval(() => {
@@ -946,7 +1287,6 @@
       }, delay);
     }
 
-    // Stop Reading
     function stopReading() {
       if (interval) {
         clearInterval(interval);
@@ -954,26 +1294,24 @@
       }
     }
 
-    // Reset Button
     resetBtn.addEventListener('click', () => {
       stopReading();
       isPlaying = false;
       currentIndex = 0;
       playPauseBtn.textContent = '⏸️';
       updateDisplay();
-      autoStartPlayback();
+      autoStart();
     });
 
-    // Exit Button
     exitBtn.addEventListener('click', () => {
       stopReading();
+      stopBinauralBeats();
+      binauralEnabled = false;
+      binauralToggle.classList.remove('active');
+      binauralControls.classList.add('hidden');
       isPlaying = false;
       currentIndex = 0;
       words = [];
-      pageBuffer = {};
-      isBuffering = false;
-      currentPdf = null;
-      autoStarted = false;
       playPauseBtn.textContent = '⏸️';
       readerScreen.classList.remove('active');
       uploadScreen.classList.remove('hidden');
@@ -984,7 +1322,6 @@
       showButtons();
     });
 
-    // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
       if (readerScreen.classList.contains('active')) {
         if (e.code === 'Space') {
@@ -1019,7 +1356,6 @@
       }
     });
 
-    // Handle orientation changes
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
         if (words.length > 0) {
@@ -1028,124 +1364,9 @@
       }, 100);
     });
 
-    // Handle resize for dynamic font adjustment
     window.addEventListener('resize', () => {
       if (words.length > 0) {
         adjustFontSize(words[currentIndex]);
-      }
-    });
-
-    // Keyboard Shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (readerScreen.classList.contains('active')) {
-        if (e.code === 'Space') {
-          e.preventDefault();
-          togglePlayPause();
-          showButtons();
-          if (isPlaying) {
-            startFadeTimer();
-          } else {
-            clearFadeTimer();
-          }
-        } else if (e.code === 'Escape') {
-          e.preventDefault();
-          if (controlsMenu.classList.contains('active')) {
-            controlsMenu.classList.remove('active');
-          } else {
-            exitBtn.click();
-          }
-        } else if (e.code === 'ArrowLeft') {
-          e.preventDefault();
-          if (currentIndex > 0) {
-            currentIndex--;
-            updateDisplay();
-          }
-        } else if (e.code === 'ArrowRight') {
-          e.preventDefault();
-          if (currentIndex < words.length - 1) {
-            currentIndex++;
-            updateDisplay();
-          }
-        }
-      }
-    });
-
-    // Exit Button
-    exitBtn.addEventListener('click', () => {
-      stopReading();
-      isPlaying = false;
-      currentIndex = 0;
-      words = [];
-      pageBuffer = {};
-      isBuffering = false;
-      currentPdf = null;
-      autoStarted = false;
-      playPauseBtn.textContent = '⏸️';
-      readerScreen.classList.remove('active');
-      uploadScreen.classList.remove('hidden');
-      fileInput.value = '';
-      ocrStatus.classList.add('hidden');
-      controlsMenu.classList.remove('active');
-      showButtons();
-      clearFadeTimer();
-    });
-
-    // Keyboard Shortcuts
-    document.addEventListener('keydown', (e) => {
-      if (readerScreen.classList.contains('active')) {
-        if (e.code === 'Space') {
-          e.preventDefault();
-          togglePlayPause();
-          showButtons();
-          if (isPlaying) {
-            startFadeTimer();
-          } else {
-            clearFadeTimer();
-          }
-        } else if (e.code === 'Escape') {
-          e.preventDefault();
-          if (controlsMenu.classList.contains('active')) {
-            controlsMenu.classList.remove('active');
-          } else {
-            exitBtn.click();
-          }
-        } else if (e.code === 'ArrowLeft') {
-          e.preventDefault();
-          if (currentIndex > 0) {
-            currentIndex--;
-            updateDisplay();
-          }
-        } else if (e.code === 'ArrowRight') {
-          e.preventDefault();
-          if (currentIndex < words.length - 1) {
-            currentIndex++;
-            updateDisplay();
-          }
-        }
-      }
-    });
-
-    // Mouse movement shows buttons
-    document.addEventListener('mousemove', () => {
-      if (readerScreen.classList.contains('active')) {
-        showButtons();
-        if (isPlaying && !controlsMenu.classList.contains('active')) {
-          startFadeTimer();
-        }
-      }
-    });
-
-    // Handle orientation changes
-    window.addEventListener('orientationchange', () => {
-      setTimeout(() => {
-        updateDisplay();
-      }, 100);
-    });
-
-    // Handle resize
-    window.addEventListener('resize', () => {
-      if (words.length > 0) {
-        updateDisplay();
       }
     });
   </script>
