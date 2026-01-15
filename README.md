@@ -1,49 +1,108 @@
-Speed Reader is a simple web application designed to help you read and learn faster by training focus, perception, and inner silence.
+# Speed Reader
 
-The app lets users upload a PDF and scan text at higher words per minute through intentional states of awareness. The goal is to quiet the inner narrative so information can be absorbed more directly, with less mental friction.
+Advanced speed reading web application with binaural beats, OCR support, and comprehensive reading analytics.
 
-HOW IT WORKS:
+##  Features
 
-Upload a PDF and extract readable text.
+### Reading
+- **Multiple Reading Modes:** Single word (RSVP), 2-word chunks, 3-word chunks
+- **Adjustable Speed:** 100-1000 WPM with real-time adjustment
+- **Smart Content Filtering:** Automatically removes TOC, ISBN, copyright notices
+- **Auto-Resume:** Bookmarks your position automatically
+- **Multi-Format Support:** PDF, DOCX, TXT files
 
-Present words in a controlled, high speed flow.
+### Focus Enhancement
+- **Binaural Beats:** 4 scientifically-backed presets + custom frequencies
+  - Theta (5 Hz) - Deep relaxation & sleep reading
+  - Alpha (10 Hz) - Calm learning & creativity
+  - Beta (15 Hz) - Focus & active learning **Recommended**
+  - Gamma (40 Hz) - High alertness & peak performance
+- **Pomodoro Timer:** 25-minute reading sessions with breaks
+- **Wake Lock:** Prevents screen from sleeping during reading
 
-Use a colored anchor letter within each word to lock your focus.
+### Customization
+- **6 Theme Presets:** Dark, Light, Sepia, Nord, Dracula, Monokai
+- **Custom Colors:** Background, text, and anchor colors
+- **8 Font Options:** Including OpenDyslexic for accessibility
+- **Auto-hiding UI:** Buttons fade after 15 seconds
 
-Let your brain handle pattern recognition and context naturally.
+### Analytics
+- **Reading Statistics:** Track words read, time spent, and streaks
+- **Reading Level Indicator:** From Beginner to Expert
+- **Session Tracking:** Monitor your progress over time
+- **Time Estimates:** See how long documents will take at your WPM
+- **Export Data:** Download your statistics and settings
 
-Train yourself to read faster, learn faster, and process information more efficiently.
+### Library
+- **Document Library:** Visual library with progress tracking
+- **Recent Documents:** Quick access to last 10 documents
+- **Progress Indicators:** See completion percentage and time remaining
 
-WHY IT WORKS:
+## 📱 Installation
 
-Based on early user feedback that was rapidly implemented, the anchor letter feature helps stabilize attention. By focusing on a single visual point, your mind can relax its internal narration and shift into faster, more intuitive comprehension.
+### On iPhone/iPad:
+1. Open https://magicklibrary.github.io/speed-reader/ in Safari
+2. Tap the Share icon (square with arrow)
+3. Select "Add to Home Screen"
+4. The app will install like a native app
 
-Over time, this trains:
+### On Android:
+1. Open the URL in Chrome
+2. Tap the menu (three dots)
+3. Select "Add to Home Screen"
+4. Or tap the install prompt when it appears
 
--Faster reading speed
--Improved focus
--Reduced subvocalization
--Better information retention
+### On Desktop:
+1. Open the URL in Chrome, Edge, or Brave
+2. Click the install icon in the address bar
+3. Or use the browser menu to install
 
-This tool is about training awareness, not forcing speed. With practice, you can move from traditional reading into a more fluid, silent, and efficient way of learning.
+## How to Use
 
-Built for experimentation, learning, and pushing the limits of how the mind processes written information.
+1. **Upload a Document:** Drag and drop or click to select PDF, DOCX, or TXT
+2. **Auto-Start:** Reading begins automatically at your saved WPM
+3. **Customize:** Tap the settings (⚙️) button to adjust speed, colors, mode
+4. **Focus:** Enable binaural beats for enhanced concentration
+5. **Track:** View your statistics and reading level in settings
 
-SUPPORT:
+## Keyboard Shortcuts
 
-Speed Reader works on:
--Desktop computers
--Android phones and tablets
--Apple phones and tablets
+- **Space:** Play/Pause
+- **←/→:** Navigate words manually
+- **Escape:** Close settings or exit document
 
-Using on iPhone or iPad:
+## Technical Details
 
-Open [ https://magicklibrary.github.io/speed-reader/ ] in Safari.
+- **Progressive Web App (PWA):** Works offline after first load
+- **No Backend Required:** All data stored locally
+- **Privacy-First:** Your documents never leave your device
+- **Cross-Platform:** Works on iOS, Android, Windows, Mac, Linux
 
--Tap the Share icon, the square with the arrow pointing up.
--Select Add to Home Screen.
--This installs the app like a native experience and allows quick access.
+## Reading Levels
 
-Offline use
+- **Beginner:** <200 WPM
+- **Average:** 200-300 WPM  
+- **Good:** 300-400 WPM
+- **Excellent:** 400-500 WPM
+- **Expert:** 500+ WPM
 
-The app works without an internet connection once downloaded. Some features work better with internet access, especially when processing scanned PDF images that require additional text recognition.
+## Built With
+
+- Vanilla JavaScript (no frameworks!)
+- PDF.js for PDF processing
+- Mammoth.js for DOCX support
+- Tesseract.js for OCR
+- Web Audio API for binaural beats
+- Service Workers for offline support
+
+## License
+
+MIT License - feel free to use and modify!
+
+## Contributing
+
+Contributions welcome! Please open an issue or PR.
+
+## Bug Reports
+
+Found a bug? Please open an issue on GitHub.
