@@ -1,6 +1,6 @@
 # Speed Reader
 
-Advanced speed reading web application with binaural beats, OCR support, and comprehensive reading analytics.
+Advanced speed reading web application with binaural beats, OCR support, and comprehensive reading analytics. Open https://magicklibrary.github.io/speed-reader/ and upload data to your mind!
 
 ##  Features
 
